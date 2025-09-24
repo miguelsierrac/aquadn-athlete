@@ -66,7 +66,7 @@
 					getToken(messaging, {
 						serviceWorkerRegistration: registration,
 						vapidKey:
-							'BIxDq1HszvHFhbBARVJcPokYfOFQo74ZAzq2LZCBVn2K740j0TnvCJMBAgHweAGIG5bPlJTfHcE9cdr_du4Gqc4'
+							''
 					})
 						.then((currentToken) => {
 							if (currentToken) {
