@@ -1,11 +1,11 @@
 {
     "background_color": "#ffffff",
     "theme_color": "#333333",
-    "name": "Deportista Coral Swimmer",
+    "name": "Deportista AQUADN",
     "short_name": "Deportista",
     "display": "standalone",
-    "start_url": "/coral-swimmer-athlete",
-    "scope": "/coral-swimmer-athlete",
+    "start_url": "/aquadn-athlete",
+    "scope": "/aquadn-athlete",
     "icons": [
       {
         "src": "logo_192.png",

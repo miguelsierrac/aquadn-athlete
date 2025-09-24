@@ -34,7 +34,7 @@
 				title +
 				'</strong><br>' +
 				body +
-				'<br><br><a class="bg-red-500 hover:bg-red-700 text-white py-1 px-1 rounded" aria-label="Contactarme" href="https://wa.me/573215384134?text=' +
+				'<br><br><a class="bg-red-500 hover:bg-red-700 text-white py-1 px-1 rounded" aria-label="Contactarme" href="https://wa.me/573128868178?text=' +
 				encodeURIComponent(message) +
 				'">💬 CONTACTARSE<a />',
 			options
@@ -91,7 +91,7 @@
 							<p
 								class="text-[#1c150d] text-[20px] font-bold leading-tight tracking-[-0.015em] text-center"
 							>
-								CLUB CORAL SWIMMER
+								AQUADN Club de Natación
 							</p>
 							<p class="text-[#9c7849] text-[14px] font-normal leading-normal text-center">
 								ID: {athlete.identification}

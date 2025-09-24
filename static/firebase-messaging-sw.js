@@ -9,13 +9,13 @@ importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-com
 // your app's Firebase config object.
 // https://firebase.google.com/docs/web/setup#config-object
 firebase.initializeApp({
-    apiKey: 'AIzaSyD2JWxdRU6AhI5WMBHgvLMb6v8x9tLzqw0',
-    authDomain: 'coral-swimmer.firebaseapp.com',
-    projectId: 'coral-swimmer',
-    storageBucket: 'coral-swimmer.appspot.com',
-    messagingSenderId: '528677262049',
-    appId: '1:528677262049:web:89c2b229471e4cef505da0',
-    measurementId: 'G-Q61LGSCMEX'
+    apiKey: '',
+    authDomain: '',
+    projectId: '',
+    storageBucket: '',
+    messagingSenderId: '',
+    appId: '',
+    measurementId: ''
 });
 
 // Retrieve an instance of Firebase Messaging so that it can handle background
@@ -42,7 +42,7 @@ messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.data.title;
     const notificationOptions = {
         body: payload.data.body,
-        icon: '/coral-swimmer-athlete/logo_512.png'
+        icon: '/aquadn-athlete/logo_512.png'
     };
 
     self.registration.showNotification(notificationTitle, notificationOptions);
