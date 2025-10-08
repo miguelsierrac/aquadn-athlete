@@ -16,6 +16,7 @@ export class GetAthlete {
             "forename": remote.nombre,
             "surname": remote.apellido,
             "identification": remote.documento,
+            "blood_type": remote.rh,
             "phone": remote.telefono,
             "start_date": remote.fecha_inicio,
             "expiration_date": remote.fecha_vencimiento,

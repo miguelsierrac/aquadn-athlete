@@ -194,6 +194,21 @@
 					data-size="18px"
 					data-weight="regular"
 				>
+					<span class="material-symbols-outlined">
+						bloodtype
+					</span>
+				</div>
+				<p class="text-[#1c150d] text-base font-normal leading-normal flex-1 truncate">
+					{athlete.blood_type ? `Tipo de sangre: ${athlete.blood_type}` : 'Tipo de sangre: No registrado'}
+				</p>
+			</div>
+			<div class="flex items-center gap-4 bg-[#fcfaf8] px-4 min-h-10">
+				<div
+					class="text-[#1c150d] flex items-center justify-center rounded-lg bg-[#f4eee7] shrink-0 size-8"
+					data-icon="Calendar"
+					data-size="18px"
+					data-weight="regular"
+				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						width="18px"
