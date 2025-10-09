@@ -1,4 +1,6 @@
 <script>
+	import { toast } from '@zerodevx/svelte-toast';
+
 	export let onSubmit;
 
 	let identityNumber = '';
@@ -6,7 +8,17 @@
 
 	async function handleSubmit() {
 		loading = true;
-		await onSubmit(identityNumber);
+		try {
+			await onSubmit(identityNumber);
+		} catch (error) {
+			toast.push('Error al iniciar sesión. Por favor, verifique su número de identidad. Si el error persiste, contáctenos.', {
+				duration: 8000,
+				theme: {
+					'--toastBackground': '#f56565',
+					'--toastBarBackground': '#c53030'
+				}
+			});
+		}
 		loading = false;
 	}
 </script>

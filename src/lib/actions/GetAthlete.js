@@ -7,6 +7,11 @@ export class GetAthlete {
 
     async handle(id) {
         let remote = await this._apiClient.get(`deportistas`, {'documento': id})
+
+        if (remote.deportistas.length === 0) {
+            throw new AthleteNotFoundError("Cannot find athlete.");
+        }
+
         return this.map(remote.deportistas[0])
     }
 
@@ -24,5 +29,12 @@ export class GetAthlete {
             "photo": remote.foto,
             "token": remote.token
         }
+    }
+}
+
+export class AthleteNotFoundError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "AthleteNotFoundError";
     }
 }

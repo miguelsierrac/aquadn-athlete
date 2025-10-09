@@ -1,6 +1,7 @@
 <script>
 	import MemberCardScreen from '$lib/screens/MemberCardScreen.svelte';
 	import { onMount, onDestroy, getContext } from 'svelte';
+	import { AthleteNotFoundError } from "$lib/actions/GetAthlete";
 
 	const provider = getContext('provider');
 	const redirect = getContext('redirect');
@@ -33,6 +34,12 @@
 				}
 				$lastSync = new Date();
 			} catch (error) {
+				if (error instanceof AthleteNotFoundError) {
+					$athlete = null;
+					$lastSync = null;
+					redirect('/');
+					return;
+				}
 				console.log(error);
 			}
 			try {
