@@ -185,3 +185,5 @@
 <slot />
 
 <SvelteToast />
+
+<SvelteToast target="critical-notifications" />

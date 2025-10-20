@@ -23,7 +23,9 @@
 	}
 
 	function showNotification(title, body, message, duration = undefined) {
-		var options = {};
+		var options = {
+			target: 'critical-notifications'
+		};
 		if (duration) {
 			options['duration'] = duration;
 		} else {
@@ -42,7 +44,7 @@
 	}
 
 	$: {
-		toast.pop(0);
+		toast.pop({target: 'critical-notifications'});
 		if (athlete) {
 			if (expired(convertDateToUTC(new Date(athlete.expiration_date))) || athlete.remaining_days <= 0) {
 				showNotification(
