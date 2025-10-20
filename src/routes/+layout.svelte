@@ -11,22 +11,23 @@
 	import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 	import { SvelteToast, toast } from '@zerodevx/svelte-toast';
 	import PushNotificationComponent from '$lib/components/PushNotification.svelte';
+	import { openDB } from 'idb';
 
 	const firebaseConfig = {
-		apiKey: '',
-		authDomain: '',
-		projectId: '',
-		storageBucket: '',
-		messagingSenderId: '',
-		appId: '',
-		measurementId: ''
+		apiKey: 'AIzaSyCb7LzJc8dxo0QsudvR8OsXXf11wlmIj-A',
+		authDomain: 'aquadn-1acfb.firebaseapp.com',
+		projectId: 'aquadn-1acfb',
+		storageBucket: 'aquadn-1acfb.firebasestorage.app',
+		messagingSenderId: '30267400091',
+		appId: '1:30267400091:web:560c95e52f760f1f4e0b3e',
+		measurementId: 'G-PXX1RBTSEZ'
 	};
 
-	// console.log('Initialize Firebase...');
+	console.log('Initialize Firebase...');
 	// Initialize Firebase
-	// const app = initializeApp(firebaseConfig);
-	// const analytics = getAnalytics(app);
-	// const messaging = getMessaging(app);
+	const app = initializeApp(firebaseConfig);
+	const analytics = getAnalytics(app);
+	const messaging = getMessaging(app);
 
 	const provider = Provider;
 
@@ -66,7 +67,7 @@
 					getToken(messaging, {
 						serviceWorkerRegistration: registration,
 						vapidKey:
-							''
+							'BHNOUr-xz2YKdEYSeMBH31EcMwchTVhJ96wBrGYnNrNnrPbcDyG9Fjn2cXtFKKMr2Atcpx8JYnncE83pG_Sdefg'
 					})
 						.then((currentToken) => {
 							if (currentToken) {
@@ -95,62 +96,89 @@
 					return;
 				}
 
-				const notificationTitle = payload.notification.title;
-				const notificationOptions = {
-					body: payload.notification.body,
-					icon: '/logo_512.png'
-				};
-
-				try {
-					var notification = new Notification(notificationTitle, notificationOptions);
-					notification.onclick = () => {
-						notification.close();
-						window.parent.focus();
-					};
-				} catch (error) {
-					console.log('Notification error: ', error);
-				}
-
-				toast.push('<strong>' + notificationTitle + '</strong><br>' + notificationOptions.body, {
-					initial: 0
-				});
+				showNotification(payload);
 			});
 		} else {
 			console.log('Unable to get permission to notify.');
 		}
 	}
 
+	async function retrieveNotifications() {
+		const dbPromise = await openDB('aquadn-athlete', 1, {
+			upgrade(db) {
+				// Creates an object store:
+				db.createObjectStore('notifications', {
+					keyPath: 'id',
+					autoIncrement: true
+				});
+			}
+		});
+
+		const value = await dbPromise.getAll('notifications');
+
+		value.forEach((item) => {
+			showNotification(item, true);
+		});
+
+		dbPromise.clear('notifications');
+	}
+
+	function showNotification(payload, fromBackground = false) {
+		const notificationTitle = payload.notification.title;
+		const notificationOptions = {
+			body: payload.notification.body,
+			icon: '/logo_512.png'
+		};
+
+		if (!fromBackground) {
+			try {
+				var notification = new Notification(notificationTitle, notificationOptions);
+				notification.onclick = () => {
+					notification.close();
+					window.parent.focus();
+				};
+			} catch (error) {
+				console.log('Notification error: ', error);
+			}
+		}
+
+		toast.push('<strong>' + notificationTitle + '</strong><br>' + notificationOptions.body, {
+			initial: 0
+		});
+	}
+
 	onMount(async () => {
+		retrieveNotifications();
 		if (!isNotificationSupported()) {
 			console.log('Notifications are not supported in this browser.');
 			return;
 		}
-		// if (Notification.permission === 'granted') {
-		// 	console.log('Notification permission already granted.');
-		// 	setupNotifications();
-		// 	return;
-		// }
-		// toast.push({
-		// 	component: {
-		// 		src: PushNotificationComponent,
-		// 		props: {
-		// 			title: 'Aceptar notificaciones',
-		// 			content: '¿Deseas recibir notificaciones de AQUADN?',
-		// 			confirmText: 'ACEPTAR',
-		// 			cancelText: 'CANCELAR',
-		// 			onConfirm: async () => {
-		// 				await requestNotificationPermission();
-		// 				setupNotifications();
-		// 			},
-		// 			onCancel: () => {
-		// 				console.log('User accepted notifications.');
-		// 			}
-		// 		},
-		// 		sendIdTo: 'toastId' // send toast id to `toastId` prop
-		// 	},
-		// 	dismissable: false,
-		// 	initial: 0
-		// });
+		if (Notification.permission === 'granted') {
+			console.log('Notification permission already granted.');
+			setupNotifications();
+			return;
+		}
+		toast.push({
+			component: {
+				src: PushNotificationComponent,
+				props: {
+					title: 'Aceptar notificaciones',
+					content: '¿Deseas recibir notificaciones de AQUADN?',
+					confirmText: 'ACEPTAR',
+					cancelText: 'CANCELAR',
+					onConfirm: async () => {
+						await requestNotificationPermission();
+						setupNotifications();
+					},
+					onCancel: () => {
+						console.log('User accepted notifications.');
+					}
+				},
+				sendIdTo: 'toastId' // send toast id to `toastId` prop
+			},
+			dismissable: false,
+			initial: 0
+		});
 	});
 </script>
 

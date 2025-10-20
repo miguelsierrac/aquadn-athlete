@@ -9,13 +9,13 @@ importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-com
 // your app's Firebase config object.
 // https://firebase.google.com/docs/web/setup#config-object
 firebase.initializeApp({
-    apiKey: '',
-    authDomain: '',
-    projectId: '',
-    storageBucket: '',
-    messagingSenderId: '',
-    appId: '',
-    measurementId: ''
+    apiKey: "AIzaSyCb7LzJc8dxo0QsudvR8OsXXf11wlmIj-A",
+    authDomain: "aquadn-1acfb.firebaseapp.com",
+    projectId: "aquadn-1acfb",
+    storageBucket: "aquadn-1acfb.firebasestorage.app",
+    messagingSenderId: "30267400091",
+    appId: "1:30267400091:web:560c95e52f760f1f4e0b3e",
+    measurementId: "G-PXX1RBTSEZ"
 });
 
 // Retrieve an instance of Firebase Messaging so that it can handle background
@@ -27,6 +27,19 @@ messaging.onBackgroundMessage((payload) => {
         '[firebase-messaging-sw.js] Received background message ',
         payload
     );
+
+    const dbPromise = indexedDB.open('aquadn-athlete', 1);
+
+    dbPromise.onsuccess = (event) => {
+        try {
+            const db = event.target.result;
+            const transaction = db.transaction('notifications', 'readwrite');
+            const store = transaction.objectStore('notifications');
+            store.add(payload);
+        } catch (error) {
+            console.error('Error adding notification to DB:', error);
+        }
+    };
 
     if (payload.notification) {
         console.log('Notification payload received:', payload.notification);
