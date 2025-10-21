@@ -4,8 +4,8 @@
     "name": "Deportista AQUADN",
     "short_name": "Deportista",
     "display": "standalone",
-    "start_url": "",
-    "scope": "",
+    "start_url": "/aquadn-athlete",
+    "scope": "/aquadn-athlete",
     "icons": [
       {
         "src": "logo_192.png",

@@ -9,13 +9,13 @@ importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-com
 // your app's Firebase config object.
 // https://firebase.google.com/docs/web/setup#config-object
 firebase.initializeApp({
-    apiKey: "AIzaSyCb7LzJc8dxo0QsudvR8OsXXf11wlmIj-A",
-    authDomain: "aquadn-1acfb.firebaseapp.com",
-    projectId: "aquadn-1acfb",
-    storageBucket: "aquadn-1acfb.firebasestorage.app",
-    messagingSenderId: "30267400091",
-    appId: "1:30267400091:web:560c95e52f760f1f4e0b3e",
-    measurementId: "G-PXX1RBTSEZ"
+    apiKey: "AIzaSyAt1EqOTzjAgPHtk4vF0tbxmHGv9dsuDdI",
+    authDomain: "club-deportivo-aquadn.firebaseapp.com",
+    projectId: "club-deportivo-aquadn",
+    storageBucket: "club-deportivo-aquadn.firebasestorage.app",
+    messagingSenderId: "106284365123",
+    appId: "1:106284365123:web:7bcf14419f6a058d172bf6",
+    measurementId: "G-0J0B082C0W"
 });
 
 // Retrieve an instance of Firebase Messaging so that it can handle background

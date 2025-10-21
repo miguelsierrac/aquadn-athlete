@@ -14,13 +14,13 @@
 	import { openDB } from 'idb';
 
 	const firebaseConfig = {
-		apiKey: 'AIzaSyCb7LzJc8dxo0QsudvR8OsXXf11wlmIj-A',
-		authDomain: 'aquadn-1acfb.firebaseapp.com',
-		projectId: 'aquadn-1acfb',
-		storageBucket: 'aquadn-1acfb.firebasestorage.app',
-		messagingSenderId: '30267400091',
-		appId: '1:30267400091:web:560c95e52f760f1f4e0b3e',
-		measurementId: 'G-PXX1RBTSEZ'
+		apiKey: "AIzaSyAt1EqOTzjAgPHtk4vF0tbxmHGv9dsuDdI",
+		authDomain: "club-deportivo-aquadn.firebaseapp.com",
+		projectId: "club-deportivo-aquadn",
+		storageBucket: "club-deportivo-aquadn.firebasestorage.app",
+		messagingSenderId: "106284365123",
+		appId: "1:106284365123:web:7bcf14419f6a058d172bf6",
+		measurementId: "G-0J0B082C0W"
 	};
 
 	console.log('Initialize Firebase...');
@@ -67,7 +67,7 @@
 					getToken(messaging, {
 						serviceWorkerRegistration: registration,
 						vapidKey:
-							'BHNOUr-xz2YKdEYSeMBH31EcMwchTVhJ96wBrGYnNrNnrPbcDyG9Fjn2cXtFKKMr2Atcpx8JYnncE83pG_Sdefg'
+							'BEYu_XMqyGIDS93WhYYN4-BP7k2cAQfC7NF81PPNRpRX8TIUPzykRz50dRlMtLFfVS9sbwOCMhezPSOna7Gdres'
 					})
 						.then((currentToken) => {
 							if (currentToken) {
