@@ -98,7 +98,13 @@
 							<p class="text-[#9c7849] text-[14px] font-normal leading-normal text-center">
 								ID: {athlete.identification}
 							</p>
-							{#if expired(convertDateToUTC(new Date(athlete.expiration_date)))}
+							{#if !athlete.expiration_date}
+								<p
+									class="text-[#9c7849] text-[14px] text-red-600 font-bold leading-normal text-center"
+								>
+									Membresía ha expirado
+								</p>
+							{:else if expired(convertDateToUTC(new Date(athlete.expiration_date)))}
 								<p
 									class="text-[#9c7849] text-[14px] text-red-600 font-bold leading-normal text-center"
 								>
@@ -303,7 +309,7 @@
 			</div>
 		</div>
 	</div>
-	{#if expired(convertDateToUTC(new Date(athlete.expiration_date)))}
+	{#if !athlete.expiration_date || expired(convertDateToUTC(new Date(athlete.expiration_date)))}
 		<div class="fixed top-60 right-8 left-8">
 			<span class="stamp is-nope">Vencido</span>
 		</div>
