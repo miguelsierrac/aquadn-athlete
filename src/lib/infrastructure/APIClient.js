@@ -47,7 +47,7 @@ export default class ApiClient {
         if (endpoint.substr(endpoint.length - 1) == '/') {
             endpoint = endpoint.slice(0, -1)
         }
-        request['url'] = this._baseURL + `&sheet=${endpoint}`
+        request['url'] = this._baseURL + `&sheet=${endpoint}&platform=web`
         request['headers'] = requestHeaders
         request['body'] = formData
         return request
