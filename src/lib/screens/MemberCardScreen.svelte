@@ -236,6 +236,7 @@
 					)}
 				</p>
 			</div>
+			<!-- 
 			<div class="flex items-center gap-4 bg-[#fcfaf8] px-4 min-h-10">
 				<div
 					class="text-[#1c150d] flex items-center justify-center rounded-lg bg-[#f4eee7] shrink-0 size-8"
@@ -267,6 +268,7 @@
 					{/if}
 				</p>
 			</div>
+			 -->
 			{#if athlete.phone}
 				<div class="flex items-center gap-4 bg-[#fcfaf8] px-4 min-h-10">
 					<div
