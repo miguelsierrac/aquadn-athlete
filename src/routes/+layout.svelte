@@ -5,29 +5,15 @@
 	import { base } from '$app/paths';
 	import { browser } from '$app/environment';
 	import { onMount, setContext } from 'svelte';
-	import { athlete, lastSync, token } from '$lib/stores.js';
-	import { initializeApp } from 'firebase/app';
-	import { getAnalytics } from 'firebase/analytics';
-	import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+	import { athlete, lastSync, token, lastMeasurement } from '$lib/stores.js';
+	import { getToken, onMessage } from 'firebase/messaging';
+	import { messaging } from '$lib/infrastructure/firebase.js';
 	import { SvelteToast, toast } from '@zerodevx/svelte-toast';
 	import PushNotificationComponent from '$lib/components/PushNotification.svelte';
+	import CelebrationPopup from '$lib/components/CelebrationPopup.svelte';
 	import { openDB } from 'idb';
 
-	const firebaseConfig = {
-		apiKey: "AIzaSyAt1EqOTzjAgPHtk4vF0tbxmHGv9dsuDdI",
-		authDomain: "club-deportivo-aquadn.firebaseapp.com",
-		projectId: "club-deportivo-aquadn",
-		storageBucket: "club-deportivo-aquadn.firebasestorage.app",
-		messagingSenderId: "106284365123",
-		appId: "1:106284365123:web:7bcf14419f6a058d172bf6",
-		measurementId: "G-0J0B082C0W"
-	};
 
-	console.log('Initialize Firebase...');
-	// Initialize Firebase
-	const app = initializeApp(firebaseConfig);
-	const analytics = getAnalytics(app);
-	const messaging = getMessaging(app);
 
 	const provider = Provider;
 
@@ -45,6 +31,7 @@
 	setContext('athlete', athlete);
 	setContext('lastSync', lastSync);
 	setContext('token', token);
+	setContext('lastMeasurement', lastMeasurement);
 
 	const isNotificationSupported = () =>
 		'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
@@ -67,7 +54,7 @@
 					getToken(messaging, {
 						serviceWorkerRegistration: registration,
 						vapidKey:
-							'BEYu_XMqyGIDS93WhYYN4-BP7k2cAQfC7NF81PPNRpRX8TIUPzykRz50dRlMtLFfVS9sbwOCMhezPSOna7Gdres'
+							'BIxDq1HszvHFhbBARVJcPokYfOFQo74ZAzq2LZCBVn2K740j0TnvCJMBAgHweAGIG5bPlJTfHcE9cdr_du4Gqc4'
 					})
 						.then((currentToken) => {
 							if (currentToken) {
@@ -187,3 +174,5 @@
 <SvelteToast />
 
 <SvelteToast target="critical-notifications" />
+
+<CelebrationPopup />

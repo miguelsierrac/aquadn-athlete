@@ -11,13 +11,16 @@
 		try {
 			await onSubmit(identityNumber);
 		} catch (error) {
-			toast.push('Error al iniciar sesión. Por favor, verifique su número de identidad. Si el error persiste, contáctenos.', {
-				duration: 8000,
-				theme: {
-					'--toastBackground': '#f56565',
-					'--toastBarBackground': '#c53030'
+			toast.push(
+				'Error al iniciar sesión. Por favor, verifique su número de identidad. Si el error persiste, contáctenos.',
+				{
+					duration: 8000,
+					theme: {
+						'--toastBackground': '#f56565',
+						'--toastBarBackground': '#c53030'
+					}
 				}
-			});
+			);
 		}
 		loading = false;
 	}
@@ -41,9 +44,7 @@
 		<button class="submit-button" disabled={loading}>Ingresar</button>
 
 		{#if loading}
-		<dialog open>
-			Cargando...
-		</dialog>
+			<dialog open>Cargando...</dialog>
 		{/if}
 	</form>
 </div>
