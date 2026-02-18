@@ -583,16 +583,16 @@
 		flex-direction: column;
 		text-align: left;
 		background-color: #fcfaf8;
-		padding: 0.5rem;
-		padding-bottom: 0.75rem;
+		padding: 0.45rem;
+		padding-bottom: 0.55rem;
 		box-sizing: border-box;
 		overflow: hidden;
 	}
 	.content-scroll {
 		flex: 1;
-		overflow-y: auto;
+		overflow-y: hidden;
 		overflow-x: hidden;
-		margin-bottom: 0.5rem;
+		margin-bottom: 0.35rem;
 		padding-right: 0.25rem;
 	}
 	.flip-btn {
@@ -628,9 +628,9 @@
 		border: 1px solid var(--primary-blue);
 	}
 	.stats-header {
-		margin-bottom: 8px;
+		margin-bottom: 6px;
 		border-bottom: 1px solid #f0f0f0;
-		padding-bottom: 6px;
+		padding-bottom: 4px;
 	}
 	.stats-header h3 {
 		margin: 0;
@@ -658,8 +658,8 @@
 	.basic-stats-grid {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 6px;
-		margin-bottom: 6px;
+		gap: 8px;
+		margin-bottom: 8px;
 	}
 	.stat-box {
 		background: #f4eee7;
@@ -687,14 +687,15 @@
 	.composition-container {
 		display: flex;
 		justify-content: space-between;
-		margin-bottom: 6px;
+		margin-bottom: 8px;
+		gap: 8px;
 	}
 	.comp-card {
 		background: white;
 		border: 1px solid #eee;
 		border-radius: 16px;
 		padding: 5px 3px;
-		width: 48%;
+		width: 50%;
 		text-align: center;
 		box-sizing: border-box;
 	}
@@ -754,13 +755,13 @@
 	.level-card-container {
 		display: flex;
 		justify-content: center;
-		margin-bottom: 8px;
+		margin-bottom: 7px;
 	}
 	.level-card-header {
 		width: 100%;
 		background: var(--shark-color, #34495e);
 		color: white;
-		padding: 12px 20px;
+		padding: 10px 16px;
 		text-align: center;
 		border-radius: 20px;
 		position: relative;
@@ -776,7 +777,7 @@
 		width: 100%;
 		background: var(--level-color, #34495e);
 		color: white;
-		padding: 10px 12px;
+		padding: 8px 10px;
 		border-radius: 16px;
 		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 		cursor: pointer;
@@ -789,11 +790,11 @@
 	.level-header-content {
 		display: flex;
 		align-items: center;
-		gap: 12px;
-		margin-bottom: 8px;
+		gap: 10px;
+		margin-bottom: 6px;
 	}
 	.level-icon-compact {
-		font-size: 28px;
+		font-size: 24px;
 		line-height: 1;
 	}
 	.level-info-compact {
@@ -802,24 +803,24 @@
 	}
 	.level-name-compact {
 		margin: 0;
-		font-size: 14px;
+		font-size: 13px;
 		font-weight: 800;
 		line-height: 1.2;
 	}
 	.level-progress-compact {
-		font-size: 10px;
+		font-size: 9px;
 		opacity: 0.9;
 		font-weight: 500;
 	}
 	.specialty-chips-inline {
 		display: flex;
-		gap: 8px;
+		gap: 6px;
 		flex-wrap: wrap;
 	}
 	.specialty-chip-inline {
-		padding: 4px 10px;
+		padding: 3px 8px;
 		border-radius: 12px;
-		font-size: 10px;
+		font-size: 9px;
 		font-weight: 700;
 		display: inline-flex;
 		align-items: center;
@@ -828,9 +829,9 @@
 		backdrop-filter: blur(10px);
 	}
 	.level-ring-container {
-		width: 60px;
-		height: 60px;
-		margin: 0 auto 6px;
+		width: 52px;
+		height: 52px;
+		margin: 0 auto 5px;
 		position: relative;
 		background: rgba(255, 255, 255, 0.1);
 		border-radius: 50%;
@@ -849,12 +850,12 @@
 		transform: rotate(45deg);
 	}
 	.level-icon-large {
-		font-size: 28px;
+		font-size: 24px;
 		z-index: 2;
 	}
 	.level-name-header {
 		margin: 0;
-		font-size: 16px;
+		font-size: 14px;
 		font-weight: 800;
 		letter-spacing: 0.5px;
 	}
@@ -862,21 +863,21 @@
 		background: rgba(0, 0, 0, 0.3);
 		padding: 2px 8px;
 		border-radius: 20px;
-		font-size: 9px;
+		font-size: 8px;
 		margin-top: 3px;
 		display: inline-block;
 	}
 	.measurements-grid {
 		display: grid;
 		grid-template-columns: 1fr 1fr 1fr;
-		gap: 6px;
+		gap: 8px;
 		margin-bottom: 8px;
 	}
 	.measure-box {
 		background: #fff;
 		border: 1px solid #eee;
 		border-radius: 12px;
-		padding: 6px 4px;
+		padding: 7px 4px;
 		text-align: center;
 		transition: all 0.2s ease;
 	}
@@ -907,10 +908,14 @@
 	}
 	.activity-section {
 		margin-bottom: 8px;
+		padding: 6px 8px;
+		background: #fff;
+		border: 1px solid #eee;
+		border-radius: 12px;
 	}
 	.perf-wrapper {
 		position: relative;
-		margin-top: 8px;
+		margin-top: 6px;
 	}
 	.locked-section {
 		transition: filter 0.3s ease;
@@ -921,24 +926,24 @@
 		user-select: none;
 	}
 	.advanced-metrics-placeholder {
-		padding: 15px 15px;
+		padding: 9px 10px;
 		text-align: center;
 		background: linear-gradient(135deg, #f8f9fa, #ffffff);
 		border-radius: 12px;
 		border: 1px solid #e0e0e0;
 	}
 	.placeholder-icon {
-		font-size: 32px;
-		margin-bottom: 5px;
+		font-size: 24px;
+		margin-bottom: 3px;
 	}
 	.placeholder-text {
-		font-size: 12px;
+		font-size: 11px;
 		font-weight: 700;
 		color: #2c3e50;
-		margin: 0 0 3px 0;
+		margin: 0 0 2px 0;
 	}
 	.placeholder-subtext {
-		font-size: 10px;
+		font-size: 9px;
 		color: #7f8c8d;
 		margin: 0;
 	}
@@ -1379,13 +1384,13 @@
 
 	/* Leaderboard Styles */
 	.leaderboard-section {
-		margin-top: 8px;
-		margin-bottom: 8px;
+		margin-top: 6px;
+		margin-bottom: 6px;
 	}
 	.leaderboard-upsell,
 	.leaderboard-cta {
 		border-radius: 16px;
-		padding: 8px 10px;
+		padding: 7px 9px;
 		display: flex;
 		align-items: center;
 		gap: 8px;
