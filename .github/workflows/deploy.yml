@@ -25,7 +25,7 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-      
+
       - name: Replace manifest for GitHub Pages
         run: rm -f static/manifest.json && cp static/manifest_gh_page.json static/manifest.json
 
