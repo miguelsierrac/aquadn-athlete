@@ -2,6 +2,8 @@
 	import { toast } from '@zerodevx/svelte-toast';
 	import TechnicalSheet from '$lib/screens/TechnicalSheet.svelte';
 	import ProductTour from '$lib/components/ProductTour.svelte';
+	import NotificationsDrawer from '$lib/components/NotificationsDrawer.svelte';
+	import { notifications } from '$lib/stores.js';
 	import { tick } from 'svelte';
 
 	export let athlete;
@@ -14,9 +16,69 @@
 	export let currentUserID;
 
 	let isFlipped = false;
+	let showNotifDrawer = false;
 	let tourInstance;
 	let isTransitioning = false;
 	let tourInitialized = false;
+	let hasViewedAchievements = false; // Track if user has viewed the back
+
+	$: unreadCount = $notifications.filter((n) => !n.read).length;
+
+	function openNotifDrawer() {
+		showNotifDrawer = true;
+	}
+
+	function closeNotifDrawer() {
+		showNotifDrawer = false;
+	}
+
+	function markAllRead() {
+		notifications.set($notifications.map((n) => ({ ...n, read: true })));
+	}
+
+	function deleteNotification(id) {
+		notifications.set($notifications.filter((n) => n.id !== id));
+	}
+
+	function clearAllNotifications() {
+		notifications.set([]);
+	}
+
+	// Puntajes guardados localmente para detectar cambios
+	function readStoredScores() {
+		try {
+			const saved = typeof localStorage !== 'undefined' && localStorage.getItem('last_seen_scores');
+			return saved ? JSON.parse(saved) : { asistencia: 0, distancia: 0 };
+		} catch { return { asistencia: 0, distancia: 0 }; }
+	}
+	function saveStoredScores(asistencia, distancia) {
+		try {
+			if (typeof localStorage !== 'undefined') {
+				localStorage.setItem('last_seen_scores', JSON.stringify({ asistencia: asistencia ?? 0, distancia: distancia ?? 0 }));
+			}
+		} catch {}
+	}
+
+	// Detectar novedades en gamificación
+	$: completedBadges = badges.filter(b => b.progress !== null && b.progress !== undefined);
+	$: hasPendingRewards = completedBadges.length > 0;
+	$: recentAchievements = completedBadges.filter(b => {
+		// Opcional: si tienes timestamp de cuándo se completó, puedes filtrar por recientes
+		// Por ahora, cualquier badge completado cuenta como "reciente"
+		return true;
+	});
+	$: hasScorePoints = (() => {
+		const stored = readStoredScores();
+		return (athlete?.puntaje_asistencia ?? 0) > stored.asistencia ||
+		       (athlete?.puntaje_distancia ?? 0) > stored.distancia;
+	})();
+	$: hasNewAchievements = (recentAchievements.length > 0 || hasScorePoints) && !hasViewedAchievements;
+
+	// Mark achievements as viewed when card is flipped, and save current scores
+	$: if (isFlipped && !hasViewedAchievements) {
+		hasViewedAchievements = true;
+		saveStoredScores(athlete?.puntaje_asistencia, athlete?.puntaje_distancia);
+	}
 
 	// Configure tour steps based on athlete tier
 	let tourSteps = [];
@@ -98,8 +160,7 @@
 
 	// Ensure card is not flipped when tour starts
 	$: if (!isLoading && tourSteps.length > 0 && !tourInitialized) {
-		const hasSeenTour =
-			typeof localStorage !== 'undefined' && localStorage.getItem('hasSeenMemberCardTour');
+		const hasSeenTour = typeof localStorage !== 'undefined' && localStorage.getItem('hasSeenMemberCardTour');
 		if (!hasSeenTour) {
 			isFlipped = false;
 			tourInitialized = true;
@@ -228,8 +289,42 @@
 
 				<!-- CARA FRONTAL -->
 				<div class="card-face card-front">
+					<!-- Botón campana: historial de notificaciones -->
+					<button
+						class="bell-btn"
+						class:has-unread={unreadCount > 0}
+						on:click={openNotifDrawer}
+						title={unreadCount > 0 ? `${unreadCount} notificacion${unreadCount === 1 ? '' : 'es'} nueva${unreadCount === 1 ? '' : 's'}` : 'Ver notificaciones'}
+					>
+						{#if unreadCount > 0}
+							<span class="bell-unread-dot">{unreadCount > 9 ? '9+' : unreadCount}</span>
+						{/if}
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="20"
+							height="20"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+							<path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+						</svg>
+					</button>
+
 					{#if athlete.tier !== 'standard'}
-						<button class="flip-btn" on:click={() => (isFlipped = !isFlipped)}>
+						<button 
+							class="flip-btn" 
+							class:has-notifications={hasNewAchievements}
+							on:click={() => (isFlipped = !isFlipped)}
+							title={hasNewAchievements ? '¡Tienes logros nuevos!' : 'Ver ficha técnica'}
+						>
+							{#if hasNewAchievements}
+								<span class="notification-dot"></span>
+							{/if}
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								width="24"
@@ -327,7 +422,7 @@
 									{athlete.surname}
 								</p>
 							</div>
-							<div class="flex w-full justify-center grow bg-[#fcfaf8] @container p-4 px-28">
+							<div class="flex w-full justify-center grow bg-[#fcfaf8] @container p-4 px-28 relative">
 								{#if athlete.photo}
 									<div
 										class="bg-center bg-no-repeat aspect-square bg-cover rounded-xl max-h-40 w-full"
@@ -506,6 +601,37 @@
 						</div>
 					</div>
 
+					<!-- Banner Teaser -->
+					{#if hasNewAchievements && athlete.tier !== 'standard'}
+						<button 
+							class="teaser-banner"
+							on:click={() => (isFlipped = !isFlipped)}
+						>
+							<span class="teaser-icon">🌟</span>
+							<span class="teaser-text">
+								{#if completedBadges.length === 1 && hasScorePoints}
+									¡Tienes 1 objetivo y puntos nuevos este mes! Gira el carnet
+								{:else if completedBadges.length > 1 && hasScorePoints}
+									¡Tienes {completedBadges.length} objetivos y puntos nuevos este mes! Gira el carnet
+								{:else if completedBadges.length === 1}
+									¡Tienes 1 objetivo completado! Gira el carnet
+								{:else if completedBadges.length > 1}
+									¡Tienes {completedBadges.length} objetivos completados! Gira el carnet
+								{:else}
+									¡Ganaste puntos este mes! Gira el carnet
+								{/if}
+								{#if athlete.puntaje_asistencia || athlete.puntaje_distancia}
+									<span class="teaser-points">
+										{#if athlete.puntaje_asistencia}+{athlete.puntaje_asistencia} pts asistencia{/if}
+										{#if athlete.puntaje_asistencia && athlete.puntaje_distancia}<br>{/if}
+										{#if athlete.puntaje_distancia}+{athlete.puntaje_distancia} pts volumen{/if}
+									</span>
+								{/if}
+							</span>
+							<span class="teaser-chevron">›</span>
+						</button>
+					{/if}
+
 					{#if !athlete.expiration_date || expired(convertDateToUTC(new Date(athlete.expiration_date)))}
 						<div class="absolute top-60 right-8 left-8 z-10">
 							<span class="stamp is-nope">Vencido</span>
@@ -527,12 +653,23 @@
 						{isLoading}
 						allLevels={gamificationLevels}
 						{currentUserID}
+						newBadges={recentAchievements}
+						showNewIndicators={isFlipped && recentAchievements.length > 0}
 						on:flip={() => (isFlipped = !isFlipped)}
 					/>
 				</div>
 			</div>
 		</div>
 	</div>
+
+	<NotificationsDrawer
+		open={showNotifDrawer}
+		notificationList={$notifications}
+		onClose={closeNotifDrawer}
+		onMarkAllRead={markAllRead}
+		onDelete={deleteNotification}
+		onClearAll={clearAllNotifications}
+	/>
 {/if}
 
 <style>
@@ -611,6 +748,67 @@
 		border: 1px solid #cbd5e1;
 	}
 
+	/* Botón campana – espejo del flip-btn, en la esquina opuesta */
+	.bell-btn {
+		position: absolute;
+		top: 20px;
+		left: 20px;
+		background: var(--bg-icon);
+		border: none;
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		cursor: pointer;
+		font-size: 18px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 20;
+		color: var(--text-muted);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		transition: transform 0.2s, box-shadow 0.2s;
+		-webkit-backface-visibility: hidden;
+		backface-visibility: hidden;
+	}
+
+	.bell-btn:hover {
+		transform: scale(1.08);
+		box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+	}
+
+	.bell-btn.has-unread {
+		background: linear-gradient(135deg, #4285f4 0%, #3b82f6 100%);
+		color: white;
+		box-shadow: 0 4px 14px rgba(66, 133, 244, 0.45);
+		animation: pulse-attention 2s infinite;
+	}
+
+	.bell-unread-dot {
+		position: absolute;
+		top: -4px;
+		right: -4px;
+		min-width: 16px;
+		height: 16px;
+		background: #ff4444;
+		border: 2px solid white;
+		border-radius: 8px;
+		font-size: 9px;
+		font-weight: 700;
+		color: white;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0 3px;
+		line-height: 1;
+	}
+
+	/* Hide bell btn when card is flipped */
+	.card-inner.is-flipped .card-front .bell-btn {
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0s 0s, transform 0.2s;
+	}
+
 	.flip-btn {
 		position: absolute;
 		top: 20px;
@@ -635,6 +833,133 @@
 		-webkit-backface-visibility: hidden;
 		backface-visibility: hidden;
 		animation: pulse-attention 2s infinite;
+	}
+
+	/* Botón de flip con notificaciones */
+	.flip-btn.has-notifications {
+		background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+		color: white;
+		box-shadow: 0 4px 16px rgba(66, 133, 244, 0.5);
+		animation: bounce-attention 1s ease-in-out infinite;
+	}
+
+	.flip-btn.has-notifications:hover {
+		transform: scale(1.1);
+		box-shadow: 0 6px 20px rgba(66, 133, 244, 0.6);
+	}
+
+	/* Punto de notificación en el botón */
+	.notification-dot {
+		position: absolute;
+		top: -2px;
+		right: -2px;
+		width: 12px;
+		height: 12px;
+		background: #ff4444;
+		border: 2px solid white;
+		border-radius: 50%;
+		animation: pulse-dot 1.5s ease-in-out infinite;
+	}
+
+	/* Banner Teaser */
+	.teaser-banner {
+		position: absolute;
+		bottom: 16px;
+		left: 16px;
+		right: 16px;
+		background: rgba(66, 133, 244, 0.95);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		border: none;
+		padding: 12px 16px;
+		border-radius: 16px;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		cursor: pointer;
+		z-index: 15;
+		box-shadow: 0 8px 24px rgba(66, 133, 244, 0.4);
+		transition: all 0.3s ease;
+		animation: slide-up 0.5s ease-out;
+	}
+
+	.teaser-banner:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 12px 32px rgba(66, 133, 244, 0.5);
+		background: rgba(66, 133, 244, 1);
+	}
+
+	.teaser-banner:active {
+		transform: translateY(0);
+	}
+
+	.teaser-icon {
+		font-size: 20px;
+		animation: spin-subtle 3s linear infinite;
+	}
+
+	.teaser-text {
+		flex: 1;
+		color: white;
+		font-size: 13px;
+		font-weight: 600;
+		text-align: left;
+		line-height: 1.3;
+	}
+
+	.teaser-points {
+		display: block;
+		font-size: 11px;
+		font-weight: 500;
+		color: rgba(255, 255, 255, 0.8);
+		margin-top: 2px;
+	}
+
+	.teaser-chevron {
+		font-size: 24px;
+		color: white;
+		font-weight: 700;
+	}
+
+	/* Animaciones */
+	@keyframes bounce-attention {
+		0%, 100% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.05);
+		}
+	}
+
+	@keyframes pulse-dot {
+		0%, 100% {
+			transform: scale(1);
+			opacity: 1;
+		}
+		50% {
+			transform: scale(1.2);
+			opacity: 0.8;
+		}
+	}
+
+	@keyframes slide-up {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@keyframes spin-subtle {
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	.help-tour-btn {
@@ -684,6 +1009,12 @@
 		transition:
 			opacity 0s 0s,
 			transform 0.2s;
+	}
+
+	.card-inner.is-flipped .card-front .teaser-banner {
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0s 0s;
 	}
 
 	.stamp {

@@ -27,7 +27,9 @@ export class GetInformation {
 			total_distance: remote.distancia_total,
 			weeklyDistance: weeklyDistance,
 			monthlyRecord: remote.record_mensual,
-			monthlyRecordDate: remote.fecha_record_mensual
+			monthlyRecordDate: remote.fecha_record_mensual,
+			puntaje_asistencia: remote.puntaje_asistencia ?? null,
+			puntaje_distancia: remote.puntaje_distancia ?? null
 		};
 	}
 }

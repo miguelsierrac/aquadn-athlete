@@ -28,9 +28,12 @@
 	export let allLevels = [];
 	export let weeklyDistance = [];
 	export let currentUserID;
+	export let userName = ''; // User's name for achievements greeting
 	export let monthlyRecord = null;
 	export let monthlyRecordDate = null;
 	export let totalDistance = null;
+	export let newBadges = []; // Nuevos badges completados
+	export let showNewIndicators = false; // Mostrar indicadores de novedad
 
 	const dispatch = createEventDispatcher();
 
@@ -93,11 +96,11 @@
 	}
 
 	let showSkillsPopup = false;
-	let showObjectivesPopup = false;
 	let showVisceralFatPopup = false;
 	let selectedBadge = null;
 	let popoverPosition = { top: 0, left: 0 };
 	let showLeaderboard = false;
+	let leaderboardInitialTab = 'ranking'; // Control which tab to show in leaderboard
 
 	function handleBadgeClick(event, badge) {
 		if (selectedBadge && selectedBadge.id === badge.id) {
@@ -119,15 +122,16 @@
 	function toggleLeaderboard() {
 		if (!showLeaderboard) {
 			trackViewLeaderboard();
+			leaderboardInitialTab = 'ranking';
 		}
 		showLeaderboard = !showLeaderboard;
 	}
 
 	function toggleObjectivesPopup() {
-		if (!showObjectivesPopup) {
-			trackViewAchievements();
-		}
-		showObjectivesPopup = !showObjectivesPopup;
+		// Track analytics and open leaderboard with achievements tab
+		trackViewAchievements();
+		leaderboardInitialTab = 'badges';
+		showLeaderboard = true;
 	}
 
 	function toggleVisceralFatPopup() {
@@ -137,6 +141,22 @@
 	function handleModalContentClick(event) {
 		event.stopPropagation();
 	}
+
+	// Rank movement detection from localStorage snapshots
+	$: userRankChange = (() => {
+		if (!level?.id || !currentUserID || typeof localStorage === 'undefined') return null;
+		try {
+			const current = localStorage.getItem(`leaderboard_snapshot_${level.id}`);
+			const prev = localStorage.getItem(`leaderboard_snapshot_prev_${level.id}`);
+			if (!current || !prev) return null;
+			const currentRanks = JSON.parse(current);
+			const prevRanks = JSON.parse(prev);
+			const currentRank = currentRanks[currentUserID];
+			const prevRank = prevRanks[currentUserID];
+			if (!currentRank || !prevRank) return null;
+			return prevRank - currentRank; // positive = subió, negative = bajó
+		} catch { return null; }
+	})();
 </script>
 
 {#if showSkillsPopup && level && level.skills}
@@ -209,57 +229,6 @@
 	</div>
 {/if}
 
-{#if showObjectivesPopup}
-	<div
-		class="popup-overlay"
-		role="button"
-		tabindex="0"
-		on:click={toggleObjectivesPopup}
-		on:keydown={(e) => {
-			if (e.key === 'Enter') toggleObjectivesPopup();
-		}}
-	>
-		<div class="popup-content objectives-popup">
-			<button class="popup-close" on:click={toggleObjectivesPopup}>&times;</button>
-			<h3>🎯 Objetivos del Nivel {level?.nombre || ''}</h3>
-			<p class="popup-subtitle">Progreso: {stats.levelProgress || 0}% completado</p>
-
-			<div class="badge-grid">
-				{#if badges && badges.length > 0}
-					{#each badges as badge (badge.id)}
-						{@const gradeClass = badge.progress
-							? `badge-slot-${badge.progress}`
-							: 'badge-slot-locked'}
-						<div
-							class="badge-slot {gradeClass}"
-							role="button"
-							tabindex="0"
-							on:click={(e) => {
-								e.stopPropagation();
-								handleBadgeClick(e, badge);
-							}}
-							on:keydown={(e) => {
-								if (e.key === 'Enter') {
-									e.stopPropagation();
-									handleBadgeClick(e, badge);
-								}
-							}}
-						>
-							{#if badge.progress}
-								<div class="tier-dot tier-{badge.progress}"></div>
-							{/if}
-							<span class="b-icon">{badge.icono}</span>
-							<span class="b-name">{badge.nombre}</span>
-						</div>
-					{/each}
-				{:else}
-					<p class="no-objectives">No hay objetivos definidos para este nivel.</p>
-				{/if}
-			</div>
-		</div>
-	</div>
-{/if}
-
 <div class="sheet-container">
 	<!-- Botón de regreso -->
 	<button class="flip-btn" on:click={() => dispatch('flip')}>
@@ -325,6 +294,10 @@
 						}}
 						style="background: {stats.levelColor};"
 					>
+						{#if showNewIndicators && newBadges.length > 0}
+							<div class="new-indicator-pulse"></div>
+							<span class="new-badge-count">{newBadges.length}</span>
+						{/if}
 						<div class="level-ring-container">
 							<div
 								class="donut-ring"
@@ -407,6 +380,10 @@
 							}}
 							style="background: {stats.levelColor};"
 						>
+							{#if showNewIndicators && newBadges.length > 0}
+								<div class="new-indicator-pulse"></div>
+								<span class="new-badge-count">{newBadges.length}</span>
+							{/if}
 							<div class="level-header-content">
 								<span class="level-icon-compact">{stats.levelIcon}</span>
 								<div class="level-info-compact">
@@ -472,10 +449,22 @@
 							if (e.key === 'Enter') toggleLeaderboard();
 						}}
 					>
+						{#if showNewIndicators && newBadges.length > 0}
+							<div class="new-indicator-pulse-leaderboard"></div>
+							<span class="new-badge-count-leaderboard">{newBadges.length}</span>
+						{/if}
 						<div class="cta-icon">🏆</div>
 						<div class="cta-text">
 							<h4>Tabla de Posiciones</h4>
-							<p>¡Compite y mide tu progreso!</p>
+							<p>
+								{#if userRankChange !== null && userRankChange > 0}
+									<span class="rank-inline cta-up">▲{userRankChange}</span> ¡Subiste {userRankChange} posición{userRankChange > 1 ? 'es' : ''}!
+								{:else if userRankChange !== null && userRankChange < 0}
+									<span class="rank-inline cta-down">▼{Math.abs(userRankChange)}</span> Bajaste {Math.abs(userRankChange)} posición{Math.abs(userRankChange) > 1 ? 'es' : ''}
+								{:else}
+									¡Compite y mide tu progreso!
+								{/if}
+							</p>
 						</div>
 						<div class="cta-arrow">›</div>
 					</div>
@@ -510,6 +499,7 @@
 								userLevel={level}
 								specialty={stats.specialty}
 								{totalDistance}
+								initialTab={leaderboardInitialTab}
 							/>
 						</section>
 					</div>
@@ -518,14 +508,22 @@
 		{/if}
 
 		<!-- SECCIÓN VOLUMEN ACTIVIDAD (Para todos los planes) -->
-		{#if chartData && chartData.length > 0 && chartData.some(d => d.distance > 0)}
+		{#if chartData.some(d => d.distance > 0) || totalDistance || monthlyRecord || stats.puntaje_asistencia != null || stats.puntaje_distancia != null}
 			<div class="activity-section">
 				<div class="chart-section">
 					<div class="chart-title">
-						<span>Volumen Actividad</span>
-						<span style="color:var(--primary-blue)"
-							>Total: {totalDistance ? (totalDistance / 1000).toFixed(1) : '0'}k</span
-						>
+						<div class="chart-title-left">
+							<span>Volumen Actividad</span>
+							{#if stats.puntaje_asistencia != null}
+								<span class="pts-hint">✅ +{stats.puntaje_asistencia} pts asistencia</span>
+							{/if}
+						</div>
+						<div class="chart-title-right">
+							<span style="color:var(--primary-blue)">Total: {totalDistance ? (totalDistance / 1000).toFixed(1) : '0'}k</span>
+							{#if stats.puntaje_distancia != null}
+								<span class="pts-hint">🏊 +{stats.puntaje_distancia} pts</span>
+							{/if}
+						</div>
 					</div>
 					<div class="bar-chart">
 						{#each chartData as day}
@@ -699,16 +697,7 @@
 		text-align: center;
 		box-sizing: border-box;
 	}
-	.comp-card.clickable {
-		cursor: pointer;
-		transition:
-			transform 0.2s,
-			box-shadow 0.2s;
-	}
-	.comp-card.clickable:hover {
-		transform: translateY(-3px);
-		box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
-	}
+
 	.chart-donut {
 		width: 40px;
 		height: 40px;
@@ -782,6 +771,7 @@
 		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 		cursor: pointer;
 		transition: all 0.3s ease;
+		position: relative;
 	}
 	.level-card-header-compact:hover {
 		transform: translateY(-3px);
@@ -947,100 +937,7 @@
 		color: #7f8c8d;
 		margin: 0;
 	}
-	.objectives-section {
-		margin-top: 20px;
-	}
-	.section-title {
-		font-size: 14px;
-		font-weight: 700;
-		color: #1c150d;
-		margin-bottom: 10px;
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
-	}
-	.badge-grid {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 10px;
-		margin-top: 8px;
-	}
-	.badge-slot {
-		aspect-ratio: 1;
-		background: white;
-		border-radius: 16px;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04);
-		cursor: pointer;
-		position: relative;
-		border: 2px solid transparent;
-		transition: transform 0.2s;
-	}
-	.badge-slot:hover {
-		transform: translateY(-3px);
-	}
-	.b-icon {
-		font-size: 24px;
-		margin-bottom: 4px;
-		filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
-	}
-	.b-name {
-		font-size: 9px;
-		font-weight: 700;
-		color: #444;
-		text-align: center;
-		line-height: 1.2;
-	}
-	.tier-dot {
-		width: 8px;
-		height: 8px;
-		border-radius: 50%;
-		position: absolute;
-		top: 8px;
-		right: 8px;
-	}
-	.tier-dot.tier-bronce {
-		background: linear-gradient(135deg, #e7cbae, #cd7f32);
-	}
-	.tier-dot.tier-plata {
-		background: linear-gradient(135deg, #f0f0f0, #c0c0c0);
-	}
-	.tier-dot.tier-oro {
-		background: linear-gradient(135deg, #fff7cc, #ffd700);
-	}
-	.badge-slot-bronce {
-		border-color: #cd7f32;
-		background: linear-gradient(to bottom right, #fff, #fff5eb);
-	}
-	.badge-slot-plata {
-		border-color: #c0c0c0;
-		background: linear-gradient(to bottom right, #fff, #f5f5f5);
-	}
-	.badge-slot-oro {
-		border-color: #ffd700;
-		background: linear-gradient(to bottom right, #fff, #fffee0);
-		box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
-	}
-	.badge-slot-locked {
-		opacity: 0.5;
-		background: #f0f0f0;
-		border: 2px dashed #ddd;
-		filter: grayscale(1);
-	}
-	.badge-slot-locked .b-icon {
-		opacity: 0.3;
-	}
-	.no-objectives {
-		font-size: 12px;
-		color: #999;
-		text-align: center;
-		padding: 20px;
-		background-color: #f9f9f9;
-		border-radius: 12px;
-		grid-column: 1 / -1;
-	}
+
 	.popover-backdrop {
 		position: fixed;
 		top: 0;
@@ -1108,6 +1005,23 @@
 		margin-bottom: 6px;
 		display: flex;
 		justify-content: space-between;
+		align-items: flex-start;
+	}
+	.chart-title-left,
+	.chart-title-right {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+	.chart-title-right {
+		align-items: flex-end;
+	}
+	.pts-hint {
+		font-size: 9px;
+		font-weight: 600;
+		color: #10b981;
+		text-transform: none;
+		letter-spacing: 0;
 	}
 	.bar-chart {
 		display: flex;
@@ -1223,9 +1137,7 @@
 		box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
 		z-index: 101;
 	}
-	.popup-content.objectives-popup {
-		max-height: 85vh;
-	}
+
 	.popup-close {
 		position: fixed;
 		top: 15px;
@@ -1395,6 +1307,8 @@
 		align-items: center;
 		gap: 8px;
 		cursor: pointer;
+		position: relative;
+		overflow: visible;
 	}
 	.leaderboard-upsell {
 		background: #f5f5f5;
@@ -1444,6 +1358,27 @@
 		font-weight: bold;
 	}
 
+	.rank-inline {
+		display: inline-flex;
+		align-items: center;
+		font-size: 10px;
+		font-weight: 800;
+		padding: 1px 5px;
+		border-radius: 8px;
+		line-height: 1.4;
+		vertical-align: middle;
+	}
+	.rank-inline.cta-up {
+		color: #065f46;
+		background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+		border: 1px solid #6ee7b7;
+	}
+	.rank-inline.cta-down {
+		color: #991b1b;
+		background: linear-gradient(135deg, #fee2e2, #fecaca);
+		border: 1px solid #fca5a5;
+	}
+
 	/* Leaderboard Modal */
 	.leaderboard-modal-overlay {
 		position: fixed;
@@ -1469,5 +1404,73 @@
 		max-width: 400px;
 		max-height: 80vh;
 		overflow-y: auto;
+	}
+
+	/* New Achievement Indicators */
+	.new-indicator-pulse {
+		position: absolute;
+		top: 8px;
+		right: 8px;
+		width: 12px;
+		height: 12px;
+		background: #ff4444;
+		border-radius: 50%;
+		animation: pulse-indicator 2s infinite;
+		z-index: 10;
+	}
+
+	.new-badge-count {
+		position: absolute;
+		top: 4px;
+		right: 4px;
+		background: #ff4444;
+		color: white;
+		font-size: 10px;
+		font-weight: 700;
+		padding: 2px 6px;
+		border-radius: 10px;
+		min-width: 18px;
+		text-align: center;
+		box-shadow: 0 2px 6px rgba(255, 68, 68, 0.4);
+		z-index: 11;
+	}
+
+	.new-indicator-pulse-leaderboard {
+		position: absolute;
+		top: 10px;
+		right: 10px;
+		width: 10px;
+		height: 10px;
+		background: #ffd700;
+		border-radius: 50%;
+		animation: pulse-indicator 2s infinite;
+		z-index: 10;
+	}
+
+	.new-badge-count-leaderboard {
+		position: absolute;
+		top: 6px;
+		right: 6px;
+		background: #ffd700;
+		color: #333;
+		font-size: 9px;
+		font-weight: 800;
+		padding: 2px 5px;
+		border-radius: 10px;
+		min-width: 16px;
+		text-align: center;
+		box-shadow: 0 2px 6px rgba(255, 215, 0, 0.5);
+		z-index: 11;
+	}
+
+	@keyframes pulse-indicator {
+		0%, 100% {
+			transform: scale(1);
+			opacity: 1;
+		}
+		50% {
+			transform: scale(1.3);
+			opacity: 0.7;
+		}
 	}
 </style>

@@ -46,6 +46,8 @@
 					$athlete.weeklyDistance = information.weeklyDistance;
 					$athlete.monthlyRecord = information.monthlyRecord;
 					$athlete.monthlyRecordDate = information.monthlyRecordDate;
+					$athlete.puntaje_asistencia = information.puntaje_asistencia;
+					$athlete.puntaje_distancia = information.puntaje_distancia;
 				}
 
 				// Token sync
@@ -77,7 +79,9 @@
 					stats = {
 						measurementDate: new Date(), // The new measurement endpoint doesn't bring a date, using current
 						height: userGamificationProgress.height || null,
-						weight: userGamificationProgress.weight || null
+						weight: userGamificationProgress.weight || null,
+						puntaje_asistencia: $athlete.puntaje_asistencia ?? null,
+						puntaje_distancia: $athlete.puntaje_distancia ?? null
 					};
 
 					if ($athlete.tier === 'kids') {
