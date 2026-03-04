@@ -10,3 +10,7 @@ export const token = localStore('TOKEN');
 export const lastMeasurement = localStore('LAST_MEASUREMENT');
 
 export const popup = writable(null);
+
+// Notification history – persisted across sessions, user-controlled
+// Shape: { id, title, body, timestamp, read }
+export const notifications = localStore('NOTIFICATIONS', []);
