@@ -55,3 +55,46 @@ export function trackViewAchievements() {
   if (!analytics) return;
   logEvent(analytics, 'view_achievements');
 }
+
+/**
+ * Tracks when a push notification is received by the app.
+ * @param {string} title - The notification title.
+ * @param {'foreground'|'background'|'app_open'} source - How the notification was received.
+ */
+export function trackNotificationReceived(title, source) {
+  if (!analytics) return;
+  logEvent(analytics, 'notification_received', {
+    notification_title: title,
+    source
+  });
+}
+
+/**
+ * Tracks when the user opens the notification history drawer.
+ * @param {number} unreadCount - Number of unread notifications at open time.
+ */
+export function trackNotificationDrawerOpened(unreadCount) {
+  if (!analytics) return;
+  logEvent(analytics, 'notification_drawer_opened', {
+    unread_count: unreadCount
+  });
+}
+
+/**
+ * Tracks when the user dismisses a single notification.
+ */
+export function trackNotificationDismissed() {
+  if (!analytics) return;
+  logEvent(analytics, 'notification_dismissed');
+}
+
+/**
+ * Tracks when the user clears all notifications.
+ * @param {number} count - How many notifications were cleared.
+ */
+export function trackNotificationClearedAll(count) {
+  if (!analytics) return;
+  logEvent(analytics, 'notification_cleared_all', {
+    cleared_count: count
+  });
+}

@@ -5,6 +5,11 @@
 	import NotificationsDrawer from '$lib/components/NotificationsDrawer.svelte';
 	import { notifications } from '$lib/stores.js';
 	import { tick } from 'svelte';
+	import {
+		trackNotificationDrawerOpened,
+		trackNotificationDismissed,
+		trackNotificationClearedAll
+	} from '$lib/infrastructure/AnalyticsService.js';
 
 	export let athlete;
 	export let onLogOut;
@@ -25,6 +30,7 @@
 	$: unreadCount = $notifications.filter((n) => !n.read).length;
 
 	function openNotifDrawer() {
+		trackNotificationDrawerOpened(unreadCount);
 		showNotifDrawer = true;
 	}
 
@@ -37,10 +43,12 @@
 	}
 
 	function deleteNotification(id) {
+		trackNotificationDismissed();
 		notifications.set($notifications.filter((n) => n.id !== id));
 	}
 
 	function clearAllNotifications() {
+		trackNotificationClearedAll($notifications.length);
 		notifications.set([]);
 	}
 

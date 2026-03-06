@@ -13,6 +13,7 @@
 	import PushNotificationComponent from '$lib/components/PushNotification.svelte';
 	import CelebrationPopup from '$lib/components/CelebrationPopup.svelte';
 	import { openDB } from 'idb';
+	import { trackNotificationReceived } from '$lib/infrastructure/AnalyticsService.js';
 
 
 
@@ -112,11 +113,11 @@
 			const payload = item.notification
 				? item
 				: { notification: { title: item.title, body: item.body } };
-			showNotification(payload, true);
+			showNotification(payload, 'app_open');
 		});
 	}
 
-	function showNotification(payload, fromBackground = false) {
+	function showNotification(payload, source = 'foreground') {
 		const notificationTitle = payload.notification.title;
 		const notificationOptions = {
 			body: payload.notification.body,
@@ -131,6 +132,8 @@
 		);
 		if (isDuplicate) return;
 
+		trackNotificationReceived(notificationTitle, source);
+
 		const cutoff = Date.now() - TTL_MS;
 		const updated = [
 			{
@@ -144,17 +147,17 @@
 		].slice(0, MAX_NOTIFICATIONS);
 		notifications.set(updated);
 
-		if (!fromBackground) {
-			try {
-				var notification = new Notification(notificationTitle, notificationOptions);
-				notification.onclick = () => {
-					notification.close();
-					window.parent.focus();
-				};
-			} catch (error) {
-				console.log('Notification error: ', error);
+			if (!source || source === 'foreground') {
+				try {
+					var notification = new Notification(notificationTitle, notificationOptions);
+					notification.onclick = () => {
+						notification.close();
+						window.parent.focus();
+					};
+				} catch (error) {
+					console.log('Notification error: ', error);
+				}
 			}
-		}
 
 		toast.push('<strong>' + notificationTitle + '</strong><br>' + notificationOptions.body, {
 			initial: 0
@@ -178,7 +181,7 @@
 		// Listen for messages posted by the SW via clients.postMessage() — works on iOS
 		const handleSwMessage = (event) => {
 			if (event.data?.type === 'PUSH_NOTIFICATION') {
-				showNotification(event.data.payload, true);
+				showNotification(event.data.payload, 'background');
 			}
 		};
 		navigator.serviceWorker.addEventListener('message', handleSwMessage);
@@ -188,7 +191,7 @@
 		try {
 			notifChannel = new BroadcastChannel('aquadn-notifications');
 			notifChannel.onmessage = (event) => {
-				showNotification(event.data, true);
+				showNotification(event.data, 'background');
 			};
 		} catch (e) {
 			console.warn('BroadcastChannel not available:', e);
