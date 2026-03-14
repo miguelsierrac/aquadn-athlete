@@ -206,7 +206,7 @@
 				title +
 				'</strong><br>' +
 				body +
-				'<br><br><a class="bg-red-500 hover:bg-red-700 text-white py-1 px-1 rounded" aria-label="Contactarme" href="https://wa.me/573215384134?text=' +
+				'<br><br><a class="bg-red-500 hover:bg-red-700 text-white py-1 px-1 rounded" aria-label="Contactarme" href="https://wa.me/573054415128?text=' +
 				encodeURIComponent(message) +
 				'">💬 CONTACTARSE<a />',
 			options
